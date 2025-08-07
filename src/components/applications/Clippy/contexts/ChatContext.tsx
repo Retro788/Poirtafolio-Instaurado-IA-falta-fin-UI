@@ -110,8 +110,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isResponding, setIsResponding] = useState(false);
 
   const sendMessage = async (txt: string) => {
-    // Verificar límite de mensajes
-    if (messageCount >= 10) {
+    // Verificar límite de mensajes antes de procesar
+    if (messageCount >= 5) {
       return;
     }
 
@@ -122,6 +122,30 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Incrementar contador de mensajes
     const newMessageCount = messageCount + 1;
     setMessageCount(newMessageCount);
+    
+    // Verificar si se alcanzó el límite DESPUÉS del mensaje del usuario
+    if (newMessageCount >= 5) {
+      setIsMessageLimitReached(true);
+      // Agregar mensaje de límite alcanzado
+      const limitMessage = {
+        id: crypto.randomUUID(),
+        role: 'system' as const,
+        content: 'Lamentamos los inconvenientes, has alcanzado el máximo de mensajes para esta muestra'
+      };
+      setMessages(m => [...m, limitMessage]);
+      
+      // Actualizar el chat record con el mensaje del usuario y el de límite
+      if (currentChatId) {
+        const updatedChat = {
+          ...chatRecords[currentChatId],
+          updatedAt: new Date(),
+          preview: txt,
+          messages: [...(chatRecords[currentChatId]?.messages || []), userMessage, limitMessage]
+        };
+        setChatRecords(prev => ({ ...prev, [currentChatId]: updatedChat }));
+      }
+      return; // Salir sin generar respuesta del asistente
+    }
     
     // Actualizar el chat actual con el mensaje del usuario
     if (currentChatId) {
@@ -149,6 +173,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       temperature: settings.temperature
     };
     console.log('[ChatContext] Prepared LLM options for API:', llmOptions);
+    console.log('🎯 Mensajes que llegaron al modelo:', allMessages);
 
     // Obtener el stream del backend
     const stream = clippyWebApi.promptStreaming(llmOptions);
@@ -184,36 +209,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsResponding(false);
     setAnimationKey('Default');
     
-    // Verificar si se alcanzó el límite después de este mensaje
-    if (newMessageCount >= 10) {
-      setIsMessageLimitReached(true);
-      // Agregar mensaje de límite alcanzado
-      const limitMessage = {
-        id: crypto.randomUUID(),
-        role: 'system' as const,
-        content: 'Lamentamos los inconvenientes, has alcanzado el máximo de mensajes para esta muestra'
+    // Solo actualizar si no se alcanzó el límite de mensajes
+    if (currentChatId && !isMessageLimitReached) {
+      const updatedChat = {
+        ...chatRecords[currentChatId],
+        updatedAt: new Date(),
+        messages: [...(chatRecords[currentChatId]?.messages || []), userMessage, assistantMsg]
       };
-      setMessages(m => [...m, limitMessage]);
-      
-      // Actualizar el chat record con todos los mensajes incluyendo el de límite
-      if (currentChatId) {
-        const updatedChat = {
-          ...chatRecords[currentChatId],
-          updatedAt: new Date(),
-          messages: [...(chatRecords[currentChatId]?.messages || []), userMessage, assistantMsg, limitMessage]
-        };
-        setChatRecords(prev => ({ ...prev, [currentChatId]: updatedChat }));
-      }
-    } else {
-      // Actualizar el chat record con la respuesta completa
-      if (currentChatId) {
-        const updatedChat = {
-          ...chatRecords[currentChatId],
-          updatedAt: new Date(),
-          messages: [...(chatRecords[currentChatId]?.messages || []), userMessage, assistantMsg]
-        };
-        setChatRecords(prev => ({ ...prev, [currentChatId]: updatedChat }));
-      }
+      setChatRecords(prev => ({ ...prev, [currentChatId]: updatedChat }));
     }
   };
 

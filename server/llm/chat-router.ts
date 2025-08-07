@@ -117,6 +117,7 @@ ChatRouter.post("/", async (req: Request, res: Response) => {
     console.log(`[Chat] System prompt: ${systemPrompt ? systemPrompt.substring(0, 100) + '...' : 'No definido'}`);
     console.log(`[Chat] Historial: ${initialPrompts ? initialPrompts.length : 0} mensajes`);
     console.log(`[Chat] Parámetros: topK=${topK}, temperature=${temperature}`);
+    console.log('🛰️  Payload final:', JSON.stringify(req.body, null, 2));
     
     if (!modelAlias || !systemPrompt || !Array.isArray(initialPrompts)) {
       return res.status(400).json({ 
@@ -147,11 +148,15 @@ ChatRouter.post("/", async (req: Request, res: Response) => {
     
     // Procesar historial de mensajes (excluyendo el último)
     const previousMessages = initialPrompts.slice(0, -1);
-    for (const msg of previousMessages) {
-      if (msg.role === 'user') {
-        // Agregar mensaje del usuario al historial
-        await session.prompt(msg.content, { maxTokens: 1 });
+    for (const message of previousMessages) {
+      if (message.role === 'user') {
+        // Procesar mensaje de usuario en el historial
+        await session.prompt(message.content, {
+          maxTokens: 1,
+          onTextChunk: () => {} // Ignorar output durante el historial
+        });
       }
+      // Los mensajes del asistente se manejan automáticamente por la sesión
     }
     
     // Obtener el último mensaje del usuario

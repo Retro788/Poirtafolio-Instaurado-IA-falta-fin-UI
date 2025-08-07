@@ -28,11 +28,6 @@ export default function Chat() {
             </div>
           </div>
         ))}
-        {isMessageLimitReached && (
-          <div className={styles.limitMessage}>
-            Lamentamos los inconvenientes, has alcanzado el máximo de mensajes para esta muestra
-          </div>
-        )}
       </div>
 
       <form

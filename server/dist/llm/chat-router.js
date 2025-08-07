@@ -68,6 +68,14 @@ async function loadModel(modelId) {
         throw new Error(`Error al cargar modelo: ${error?.message || 'Error desconocido'}`);
     }
 }
+async function createSessionWithSystemPrompt(model, context, systemPrompt) {
+    const sequence = context.getSequence();
+    const session = new LlamaChatSession({
+        contextSequence: sequence,
+        systemPrompt: systemPrompt
+    });
+    return session;
+}
 ChatRouter.post("/", async (req, res) => {
     try {
         const { modelAlias, systemPrompt, initialPrompts, topK, temperature } = req.body;
@@ -75,6 +83,7 @@ ChatRouter.post("/", async (req, res) => {
         console.log(`[Chat] System prompt: ${systemPrompt ? systemPrompt.substring(0, 100) + '...' : 'No definido'}`);
         console.log(`[Chat] Historial: ${initialPrompts ? initialPrompts.length : 0} mensajes`);
         console.log(`[Chat] Parámetros: topK=${topK}, temperature=${temperature}`);
+        console.log('🛰️  Payload final:', JSON.stringify(req.body, null, 2));
         if (!modelAlias || !systemPrompt || !Array.isArray(initialPrompts)) {
             return res.status(400).json({
                 error: "Se requieren modelAlias, systemPrompt e initialPrompts"
@@ -85,11 +94,23 @@ ChatRouter.post("/", async (req, res) => {
         res.setHeader("Connection", "keep-alive");
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Headers", "Cache-Control");
-        const { model, context, session } = await loadModel(modelAlias);
-        const messages = [
-            { role: 'system', content: systemPrompt },
-            ...initialPrompts
-        ];
+        const { model } = await loadModel(modelAlias);
+        const context = await model.createContext({
+            contextSize: 4096,
+        });
+        const session = new LlamaChatSession({
+            contextSequence: context.getSequence(),
+            systemPrompt: systemPrompt
+        });
+        const previousMessages = initialPrompts.slice(0, -1);
+        for (const message of previousMessages) {
+            if (message.role === 'user') {
+                await session.prompt(message.content, {
+                    maxTokens: 1,
+                    onTextChunk: () => { }
+                });
+            }
+        }
         const lastMessage = initialPrompts[initialPrompts.length - 1];
         if (!lastMessage || lastMessage.role !== "user") {
             return res.status(400).json({ error: "El último mensaje debe ser del usuario" });

@@ -32,6 +32,7 @@ async function call<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export function promptStreaming(opts: LlmOptions): ReadableStream<string> & { cancel(): void } {
+  console.log('🚀 SystemPrompt que se envía:', opts.systemPrompt?.slice(0, 300)); // primeros 300 caracteres
   console.log('[promptStreaming] Starting with options:', opts);
   const controller = new AbortController();
   const stream = new ReadableStream<string>({

@@ -71,16 +71,68 @@ async function generateResponse(history, res) {
   const userText = lastUserMessage?.content || '';
   console.log('💬 [Backend] User message:', userText);
   
-  // Simulamos una respuesta de Clippy basada en el mensaje del usuario
-  let response;
-  if (userText.toLowerCase().includes('hola') || userText.toLowerCase().includes('hello')) {
-    response = '¡Hola! Soy Clippy, tu asistente virtual. ¿En qué puedo ayudarte hoy?';
-  } else if (userText.toLowerCase().includes('quien eres') || userText.toLowerCase().includes('who are you')) {
-    response = 'Soy Clippy, el famoso asistente de Microsoft Office. Estoy aquí para ayudarte con cualquier tarea.';
-  } else if (userText.toLowerCase().includes('llama')) {
-    response = 'No, no soy Llama. Soy Clippy, tu asistente de confianza desde los días de Office 97.';
-  } else {
-    response = `Entiendo que me preguntas sobre "${userText}". Como Clippy, estoy aquí para ayudarte con documentos, hojas de cálculo y más. ¿Hay algo específico en lo que pueda asistirte?`;
+  // Obtener el system prompt para entender el contexto
+  const systemMessage = history.find(msg => msg.role === 'system');
+  const systemPrompt = systemMessage?.content || '';
+  
+  // Simulamos una respuesta más inteligente de Clippy
+  let response = generateClippyResponse(userText, history, systemPrompt);
+  
+  function generateClippyResponse(userText, conversationHistory, systemPrompt) {
+    const text = userText.toLowerCase();
+    
+    // Respuestas de saludo
+    if (text.includes('hola') || text.includes('hello') || text.includes('hi ')) {
+      const greetings = [
+        '¡Hola! Soy Clippy, tu asistente de oficina favorito. ¿En qué puedo ayudarte hoy?',
+        '¡Hola! Me alegra verte de nuevo. ¿Hay algo en lo que pueda asistirte?',
+        '¡Saludos! Soy Clippy y estoy aquí para hacer tu trabajo más fácil. ¿Qué necesitas?'
+      ];
+      return greetings[Math.floor(Math.random() * greetings.length)];
+    }
+    
+    // Preguntas sobre identidad
+    if (text.includes('quien eres') || text.includes('who are you') || text.includes('qué eres')) {
+      return 'Soy Clippy, el asistente de Microsoft Office que ha estado ayudando a usuarios desde 1997. Aunque originalmente ayudaba con documentos de Word, ahora puedo asistirte con una gran variedad de tareas. ¡Siempre estoy listo para ayudar!';
+    }
+    
+    // Preguntas sobre capacidades
+    if (text.includes('qué puedes hacer') || text.includes('what can you do') || text.includes('ayuda')) {
+      return 'Puedo ayudarte con muchas cosas: responder preguntas, explicar conceptos, ayudarte con tareas de oficina, resolver problemas, dar consejos, y mucho más. Mi objetivo es ser tu asistente útil y amigable. ¿Hay algo específico en lo que te gustaría que te ayude?';
+    }
+    
+    // Preguntas técnicas o de programación
+    if (text.includes('código') || text.includes('programar') || text.includes('javascript') || text.includes('python') || text.includes('html')) {
+      return 'Me encanta ayudar con programación. Aunque mi especialidad original era Microsoft Office, he aprendido mucho sobre desarrollo web y programación. ¿Qué tipo de código estás escribiendo? Puedo ayudarte con sintaxis, debugging, mejores prácticas, o explicarte conceptos.';
+    }
+    
+    // Preguntas sobre trabajo/productividad
+    if (text.includes('trabajo') || text.includes('productividad') || text.includes('organizar') || text.includes('planificar')) {
+      return 'La productividad es mi especialidad. Puedo ayudarte a organizar tareas, crear planes de trabajo, optimizar procesos, o darte consejos para ser más eficiente. ¿En qué área específica te gustaría mejorar tu productividad?';
+    }
+    
+    // Respuestas emocionales/motivacionales
+    if (text.includes('cansado') || text.includes('estresado') || text.includes('difícil') || text.includes('problema')) {
+      return 'Entiendo que a veces las cosas pueden ser desafiantes. Como tu asistente, estoy aquí para ayudarte a encontrar soluciones y hacer las cosas más fáciles. ¿Puedes contarme más sobre lo que te está causando dificultades? Juntos podemos encontrar una manera de resolverlo.';
+    }
+    
+    // Preguntas sobre el futuro o tecnología
+    if (text.includes('futuro') || text.includes('ia') || text.includes('inteligencia artificial') || text.includes('tecnología')) {
+      return 'La tecnología ha avanzado mucho desde mis primeros días en Office 97. Es emocionante ver cómo la IA y las nuevas tecnologías están cambiando la forma en que trabajamos. Aunque soy un asistente clásico, me adapto a los nuevos tiempos para seguir siendo útil. ¿Te interesa algún aspecto particular de la tecnología?';
+    }
+    
+    // Respuesta por defecto más inteligente
+    const userWords = userText.split(' ').filter(word => word.length > 3);
+    const keyWords = userWords.slice(0, 3).join(', ');
+    
+    const defaultResponses = [
+      `Interesante pregunta sobre ${keyWords}. Como Clippy, siempre trato de ser útil. ¿Podrías darme un poco más de contexto para poder ayudarte mejor?`,
+      `Veo que mencionas ${keyWords}. Me gustaría ayudarte con eso. ¿Puedes explicarme más detalles sobre lo que necesitas?`,
+      `Entiendo tu consulta sobre ${keyWords}. Estoy aquí para asistirte. ¿Hay algún aspecto específico en el que te gustaría que me enfoque?`,
+      `Gracias por compartir eso sobre ${keyWords}. Como tu asistente, quiero asegurarme de darte la mejor ayuda posible. ¿Qué tipo de asistencia estás buscando exactamente?`
+    ];
+    
+    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
   }
   
   console.log('📝 [Backend] Generated response:', response);

@@ -55,8 +55,12 @@ export async function downloadModel(id, onProgress) {
         const request = client.get(model.url, (response) => {
             if (response.statusCode === 302 || response.statusCode === 301) {
                 if (response.headers.location) {
+                    console.log(`Redirección detectada a: ${response.headers.location}`);
                     return downloadFromUrl(response.headers.location, dest, onProgress)
-                        .then(() => resolve({ ...model, localPath: dest, downloaded: true }))
+                        .then(() => {
+                        console.log(`Modelo ${id} descargado exitosamente`);
+                        resolve({ ...model, localPath: dest, downloaded: true });
+                    })
                         .catch(reject);
                 }
             }
@@ -66,6 +70,7 @@ export async function downloadModel(id, onProgress) {
             }
             const totalSize = parseInt(response.headers['content-length'] || '0', 10);
             let downloadedSize = 0;
+            console.log(`Descarga directa, tamaño: ${totalSize} bytes`);
             const fileStream = fs.createWriteStream(dest);
             response.on('data', (chunk) => {
                 downloadedSize += chunk.length;
@@ -85,6 +90,7 @@ export async function downloadModel(id, onProgress) {
                 });
             });
             fileStream.on('error', (err) => {
+                console.error(`Error escribiendo archivo: ${err}`);
                 fs.unlink(dest, () => { });
                 reject(err);
             });
@@ -93,17 +99,30 @@ export async function downloadModel(id, onProgress) {
         request.setTimeout(300000);
     });
 }
-async function downloadFromUrl(url, dest, onProgress) {
+async function downloadFromUrl(url, dest, onProgress, maxRedirects = 5) {
     return new Promise((resolve, reject) => {
+        if (maxRedirects <= 0) {
+            reject(new Error('Demasiadas redirecciones'));
+            return;
+        }
         const parsedUrl = new URL(url);
         const client = parsedUrl.protocol === 'https:' ? https : http;
         const request = client.get(url, (response) => {
+            if (response.statusCode === 302 || response.statusCode === 301) {
+                if (response.headers.location) {
+                    console.log(`Siguiendo redirección a: ${response.headers.location}`);
+                    return downloadFromUrl(response.headers.location, dest, onProgress, maxRedirects - 1)
+                        .then(resolve)
+                        .catch(reject);
+                }
+            }
             if (response.statusCode !== 200) {
                 reject(new Error(`Error HTTP: ${response.statusCode}`));
                 return;
             }
             const totalSize = parseInt(response.headers['content-length'] || '0', 10);
             let downloadedSize = 0;
+            console.log(`Iniciando descarga, tamaño: ${totalSize} bytes`);
             const fileStream = fs.createWriteStream(dest);
             response.on('data', (chunk) => {
                 downloadedSize += chunk.length;
@@ -115,14 +134,19 @@ async function downloadFromUrl(url, dest, onProgress) {
             response.pipe(fileStream);
             fileStream.on('finish', () => {
                 fileStream.close();
+                console.log(`Descarga completada: ${dest}`);
                 resolve();
             });
             fileStream.on('error', (err) => {
+                console.error(`Error escribiendo archivo: ${err}`);
                 fs.unlink(dest, () => { });
                 reject(err);
             });
         });
-        request.on('error', reject);
+        request.on('error', (err) => {
+            console.error(`Error de red: ${err}`);
+            reject(err);
+        });
         request.setTimeout(300000);
     });
 }

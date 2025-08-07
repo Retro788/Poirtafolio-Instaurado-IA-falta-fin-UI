@@ -35,23 +35,31 @@ const Chat: React.FC<ChatProps> = ({ style }) => {
   return (
     <div className={styles.chat} style={style}>
       <div className={styles.messages} ref={listRef}>
-        {messages.map((m: Message) => (
-          <div key={m.id} className={styles.messageRow}>
-            <img
-              src={m.role === 'user' ? questionIcon : defaultClippy}
-              alt={m.role === 'user' ? 'You' : 'Clippy'}
-              className={styles.messageIcon}
-            />
-            <div className={styles.messageContent}>
-              {m.content}
+        {messages.map((m: Message) => {
+          // Detectar si es el mensaje de límite del sistema
+          const isLimitMessage = m.role === 'system' && m.content.includes('has alcanzado el máximo de mensajes');
+          
+          if (isLimitMessage) {
+            return (
+              <div key={m.id} className={styles.limitMessage}>
+                {m.content}
+              </div>
+            );
+          }
+          
+          return (
+            <div key={m.id} className={styles.messageRow}>
+              <img
+                src={m.role === 'user' ? questionIcon : defaultClippy}
+                alt={m.role === 'user' ? 'You' : 'Clippy'}
+                className={styles.messageIcon}
+              />
+              <div className={styles.messageContent}>
+                {m.content}
+              </div>
             </div>
-          </div>
-        ))}
-        {isMessageLimitReached && (
-          <div className={styles.limitMessage}>
-            Lamentamos los inconvenientes, has alcanzado el máximo de mensajes para esta muestra
-          </div>
-        )}
+          );
+        })}
       </div>
 
       <form className={styles.inputRow} onSubmit={handleSubmit}>
