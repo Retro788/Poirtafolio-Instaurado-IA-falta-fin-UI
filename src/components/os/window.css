@@ -1,0 +1,44 @@
+/* =====  Base Win 98 look  ===== */ 
+.window { 
+  background: #c0c0c0; 
+  border: 2px solid #000; 
+  display: flex;           /* ←  vertical stack */ 
+  flex-direction: column; 
+  box-sizing: border-box; 
+} 
+
+.title-bar { 
+  background: linear-gradient(90deg, #00007b 0%, #003dce 100%); 
+  color: #fff; 
+  font-family: 'MS Sans Serif', sans-serif; 
+  height: 22px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding: 0 4px; 
+} 
+
+/* ——— ventana genérica ——— */ 
+.window-body { 
+  flex: 1 1 auto; 
+  display: flex; 
+  flex-direction: column; 
+  overflow: hidden;    /*  ← nada se desborda fuera del marco   */ 
+}
+
+/* ─── Esquina de redimensión (típica Win 9x) ─── */
+.resize-corner { 
+  position: absolute; 
+  right: 0; 
+  bottom: 0; 
+  width: 16px; 
+  height: 16px; 
+  cursor: nwse-resize; 
+  background: url('data:image/gif;base64,R0lGODlhEAAQAIABAP///wAAACH5BAEAAAEALAAAAAAQABAAAALCjI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyrvdwAAOw==') 
+    no-repeat center; 
+}
+
+/* ——— Clippy específico ——— */
+.window--clippy .window-body {
+  overflow: auto;      /*  Clippy sí necesita scroll interno    */
+}

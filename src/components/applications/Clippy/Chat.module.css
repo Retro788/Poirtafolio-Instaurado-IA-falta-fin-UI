@@ -1,0 +1,29 @@
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: "MS Sans Serif", sans-serif;
+}
+
+.messages {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.inputRow {
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  border-top: 1px solid #808080;
+  background: #c0c0c0;
+}
+
+.inputRow input[type='text'] {
+  flex: 1 1 auto;
+  height: 22px;          /* ✱ fija el alto, adiós "textarea" gigante   */
+}
+
+.inputRow button {
+  width: 60px;           /* ✱ botón siempre igual, sin icono "lock"    */
+}

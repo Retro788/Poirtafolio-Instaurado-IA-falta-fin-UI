@@ -1,0 +1,10 @@
+.bubble-window {
+  position: absolute;
+  bottom: 100px;
+  right: 40px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

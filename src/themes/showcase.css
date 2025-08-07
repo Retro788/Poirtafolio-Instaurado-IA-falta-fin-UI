@@ -1,0 +1,19 @@
+:root {
+  --desk-wallpaper: #54008c;
+}
+
+/* ——— Showcase específico ——— */
+.showcase-panel {
+  background: linear-gradient(180deg, #002f9a 0%, #0082d9 100%);
+}
+
+/* ——— NO tocar las ventanas del "sistema operativo" ——— */
+:where(.desktop) > .window,
+:where(.desktop) > .window .title-bar {
+  all: unset;      /* ← borra props heredadas del gradiente accidental */
+}
+
+/* Estilos específicos para Clippy */
+.window--clippy .title-bar {
+  background: linear-gradient(90deg, #00007b 0%, #003dce 100%);
+}

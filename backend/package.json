@@ -1,0 +1,19 @@
+{
+  "name": "clippy-llm-backend",
+  "version": "1.0.0",
+  "description": "Backend LLM server for Clippy",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "node-llama-cpp": "^3.0.0"
+  },
+  "keywords": ["llm", "clippy", "chat", "ai"],
+  "author": "",
+  "license": "MIT"
+}
