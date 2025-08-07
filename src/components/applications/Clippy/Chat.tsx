@@ -1,6 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import { useChat } from './contexts/ChatContext';
 import styles from './Chat.module.css';
+import questionIcon from './images/icons/question.png';
+import defaultClippy from './images/animations/Default.png';
 
 export default function Chat() {
   const { messages, sendMessage, abortCurrent, isMessageLimitReached } = useChat();
@@ -15,10 +17,22 @@ export default function Chat() {
     <div className={styles.chat}>
       <div className={styles.messages} ref={listRef}>
         {messages.map((m: { id: string; role: string; content: string }) => (
-          <div key={m.id} className={styles[m.role]}>
-            {m.content}
+          <div key={m.id} className={styles.messageRow}>
+            <img
+              src={m.role === 'user' ? questionIcon : defaultClippy}
+              alt={m.role === 'user' ? 'You' : 'Clippy'}
+              className={styles.messageIcon}
+            />
+            <div className={styles.messageContent}>
+              {m.content}
+            </div>
           </div>
         ))}
+        {isMessageLimitReached && (
+          <div className={styles.limitMessage}>
+            Lamentamos los inconvenientes, has alcanzado el máximo de mensajes para esta muestra
+          </div>
+        )}
       </div>
 
       <form

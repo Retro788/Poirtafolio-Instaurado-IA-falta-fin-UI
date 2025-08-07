@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, FormEvent } from 'react';
 import { useChat } from '../contexts/ChatContext';
 import styles from './Chat.module.css';
+import questionIcon from '../images/icons/question.png';
+import defaultClippy from '../images/animations/Default.png';
 
 /*  Tipo mínimo para render    */
 interface Message {
@@ -34,8 +36,15 @@ const Chat: React.FC<ChatProps> = ({ style }) => {
     <div className={styles.chat} style={style}>
       <div className={styles.messages} ref={listRef}>
         {messages.map((m: Message) => (
-          <div key={m.id} className={styles[m.role]}>
-            {m.content}
+          <div key={m.id} className={styles.messageRow}>
+            <img
+              src={m.role === 'user' ? questionIcon : defaultClippy}
+              alt={m.role === 'user' ? 'You' : 'Clippy'}
+              className={styles.messageIcon}
+            />
+            <div className={styles.messageContent}>
+              {m.content}
+            </div>
           </div>
         ))}
       </div>

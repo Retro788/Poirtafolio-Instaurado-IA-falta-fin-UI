@@ -6,9 +6,45 @@
 }
 
 .messages {
-  flex: 1 1 auto;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   padding: 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100% - 50px);
+  flex: 1 1 auto;
+  background: #c0c0c0;
+}
+
+/* Estilos para mensajes individuales */
+.messageRow {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  padding: 6px;
+  border-bottom: 1px solid #808080;
+  padding-bottom: 10px;
+}
+
+.messageRow:last-child {
+  border-bottom: none;
+  padding-bottom: 6px;
+}
+
+.messageIcon {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.messageContent {
+  flex: 1;
+  word-wrap: break-word;
+  font-size: 11px;
+  line-height: 1.3;
+  color: #000;
+  background: transparent;
 }
 
 .inputRow {
@@ -26,4 +62,17 @@
 
 .inputRow button {
   width: 60px;           /* ✱ botón siempre igual, sin icono "lock"    */
+}
+
+/* Estilo para el recuadro amarillo del límite de mensajes */
+.limitMessage {
+  background: #ffff99;
+  border: 2px inset #c0c0c0;
+  padding: 8px;
+  margin: 8px 4px;
+  font-size: 11px;
+  color: #000;
+  text-align: center;
+  font-family: "MS Sans Serif", sans-serif;
+  box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf;
 }
