@@ -50,6 +50,8 @@ interface ChatContextType {
   deleteAllChats: () => void;
   settings: ChatSettings;
   setSettings: (settings: ChatSettings) => void;
+  messageCount: number;
+  isMessageLimitReached: boolean;
 }
 
 /* ──────────── implementación ──────────── */
@@ -57,10 +59,12 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [animationKey, setAnimationKey] = useState<string>('');
+  const [animationKey, setAnimationKey] = useState('Default');
   const [status, setStatus] = useState<ClippyNamedStatus>('welcome');
   const [isChatWindowOpen, setIsChatWindowOpen] = useState(false);
-  const [isModelLoaded, setIsModelLoaded] = useState(true); // Simulamos que el modelo está cargado
+  const [isModelLoaded, setIsModelLoaded] = useState(true);
+  const [messageCount, setMessageCount] = useState(0);
+  const [isMessageLimitReached, setIsMessageLimitReached] = useState(false); // Simulamos que el modelo está cargado
   const [chatRecords, setChatRecords] = useState<Record<string, ChatRecord>>({});
   const [currentChatId, setCurrentChatId] = useState<string>('');
   const [settings, setSettings] = useState<ChatSettings>({
@@ -82,6 +86,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       setChatRecords({ [initialChatId]: initialChat });
       setCurrentChatId(initialChatId);
+      setMessageCount(0);
+      setIsMessageLimitReached(false);
     }
   }, []);
 
@@ -104,9 +110,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isResponding, setIsResponding] = useState(false);
 
   const sendMessage = async (txt: string) => {
+    // Verificar límite de mensajes
+    if (messageCount >= 10) {
+      return;
+    }
+
     console.log('[ChatContext] Starting sendMessage with text:', txt);
     const userMessage = { id: crypto.randomUUID(), role: 'user' as const, content: txt };
     setMessages((m) => [...m, userMessage]);
+    
+    // Incrementar contador de mensajes
+    const newMessageCount = messageCount + 1;
+    setMessageCount(newMessageCount);
     
     // Actualizar el chat actual con el mensaje del usuario
     if (currentChatId) {
@@ -169,14 +184,36 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsResponding(false);
     setAnimationKey('Default');
     
-    // Actualizar el chat record con la respuesta completa
-    if (currentChatId) {
-      const updatedChat = {
-        ...chatRecords[currentChatId],
-        updatedAt: new Date(),
-        messages: [...(chatRecords[currentChatId]?.messages || []), userMessage, assistantMsg]
+    // Verificar si se alcanzó el límite después de este mensaje
+    if (newMessageCount >= 10) {
+      setIsMessageLimitReached(true);
+      // Agregar mensaje de límite alcanzado
+      const limitMessage = {
+        id: crypto.randomUUID(),
+        role: 'system' as const,
+        content: 'Lamentamos los inconvenientes, has alcanzado el máximo de mensajes para esta muestra'
       };
-      setChatRecords(prev => ({ ...prev, [currentChatId]: updatedChat }));
+      setMessages(m => [...m, limitMessage]);
+      
+      // Actualizar el chat record con todos los mensajes incluyendo el de límite
+      if (currentChatId) {
+        const updatedChat = {
+          ...chatRecords[currentChatId],
+          updatedAt: new Date(),
+          messages: [...(chatRecords[currentChatId]?.messages || []), userMessage, assistantMsg, limitMessage]
+        };
+        setChatRecords(prev => ({ ...prev, [currentChatId]: updatedChat }));
+      }
+    } else {
+      // Actualizar el chat record con la respuesta completa
+      if (currentChatId) {
+        const updatedChat = {
+          ...chatRecords[currentChatId],
+          updatedAt: new Date(),
+          messages: [...(chatRecords[currentChatId]?.messages || []), userMessage, assistantMsg]
+        };
+        setChatRecords(prev => ({ ...prev, [currentChatId]: updatedChat }));
+      }
     }
   };
 
@@ -200,6 +237,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (chatRecords[chatId]) {
       setCurrentChatId(chatId);
       setMessages(chatRecords[chatId].messages);
+      // Contar mensajes del usuario para este chat
+      const userMessageCount = chatRecords[chatId].messages.filter(msg => msg.role === 'user').length;
+      setMessageCount(userMessageCount);
+      setIsMessageLimitReached(userMessageCount >= 10);
     }
   };
 
@@ -263,7 +304,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       deleteChat,
       deleteAllChats,
       settings,
-      setSettings
+      setSettings,
+      messageCount,
+      isMessageLimitReached
     }}>
       {children}
     </ChatContext.Provider>

@@ -32,10 +32,12 @@ async function call<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export function promptStreaming(opts: LlmOptions): ReadableStream<string> & { cancel(): void } {
+  console.log('[promptStreaming] Starting with options:', opts);
   const controller = new AbortController();
   const stream = new ReadableStream<string>({
     async start(ctrl) {
       try {
+        console.log('[promptStreaming] Making fetch request to:', CHAT_API);
         const res = await fetch(CHAT_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -43,17 +45,21 @@ export function promptStreaming(opts: LlmOptions): ReadableStream<string> & { ca
           signal: controller.signal
         });
         
+        console.log('[promptStreaming] Response status:', res.status);
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
         
         const reader = res.body!.getReader();
-        const decoder = new TextDecoder();
+        const decoder = new TextDecoder('utf-8');
         let buf = "";
         
         while (true) {
           const { value, done } = await reader.read();
-          if (done) break;
+          if (done) {
+            console.log('[promptStreaming] Stream finished');
+            break;
+          }
           
           buf += decoder.decode(value, { stream: true });
           const lines = buf.split("\n");
@@ -61,29 +67,36 @@ export function promptStreaming(opts: LlmOptions): ReadableStream<string> & { ca
           
           for (const line of lines) {
             if (line.startsWith("data: ")) {
-              const data = line.slice(6);
+              const data = line.slice(6).trim();
+              console.log('[promptStreaming] Processing data:', data);
               if (data === "[DONE]") {
+                console.log('[promptStreaming] Received DONE signal');
                 ctrl.close();
                 return;
               }
               try {
                 const parsed = JSON.parse(data);
+                console.log('[promptStreaming] Parsed token:', parsed.token);
                 if (parsed.token) {
                   ctrl.enqueue(parsed.token);
                 }
               } catch (e) {
-                // Ignorar líneas que no son JSON válido
+                console.warn('[promptStreaming] Error parsing JSON:', e, 'Raw data:', data);
               }
             }
           }
         }
         ctrl.close();
       } catch (error) {
+        console.error('[promptStreaming] Stream error:', error);
         ctrl.error(error);
       }
     }
   });
-  return Object.assign(stream, { cancel: () => controller.abort() });
+  return Object.assign(stream, { cancel: () => {
+    console.log('[promptStreaming] Stream cancelled');
+    controller.abort();
+  }});
 }
 
 // Función de compatibilidad con la implementación anterior

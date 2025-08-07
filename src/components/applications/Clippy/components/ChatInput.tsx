@@ -7,19 +7,19 @@ export type ChatInputProps = {
 };
 
 export function ChatInput({ onSend, onAbort }: ChatInputProps) {
-  const { status } = useChat();
+  const { status, isModelLoaded, isMessageLimitReached } = useChat();
   const [message, setMessage] = useState("");
-  const { isModelLoaded } = useChat();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = useCallback(() => {
+    if (isMessageLimitReached) return;
     const trimmedMessage = message.trim();
 
     if (trimmedMessage) {
       onSend(trimmedMessage);
       setMessage("");
     }
-  }, [message, onSend]);
+  }, [message, onSend, isMessageLimitReached]);
 
   const handleAbort = useCallback(() => {
     setMessage("");
@@ -47,6 +47,11 @@ export function ChatInput({ onSend, onAbort }: ChatInputProps) {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
+      if (isMessageLimitReached) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       const trimmedMessage = message.trim();
 
       if (trimmedMessage) {
@@ -59,7 +64,9 @@ export function ChatInput({ onSend, onAbort }: ChatInputProps) {
     }
   };
 
-  const placeholder = isModelLoaded
+  const placeholder = isMessageLimitReached
+    ? "Límite de mensajes alcanzado"
+    : isModelLoaded
     ? "Type a message, press Enter to send..."
     : "This is your chat input, we're just waiting for a model to load...";
 
@@ -70,15 +77,17 @@ export function ChatInput({ onSend, onAbort }: ChatInputProps) {
         ref={textareaRef}
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        disabled={!isModelLoaded}
+        disabled={!isModelLoaded || isMessageLimitReached}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className={styles["input-field"]}
+        style={isMessageLimitReached ? { backgroundColor: '#f0f0f0', color: '#999', cursor: 'not-allowed' } : {}}
       />
       <button
-        disabled={!isModelLoaded}
+        disabled={!isModelLoaded || isMessageLimitReached}
         className={styles["send-button"]}
         onClick={handleSendOrAbort}
+        style={isMessageLimitReached ? { backgroundColor: '#ccc', color: '#999', cursor: 'not-allowed' } : {}}
       >
         {status === "responding" ? "Abort" : "Send"}
       </button>

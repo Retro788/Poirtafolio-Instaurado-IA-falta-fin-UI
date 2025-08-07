@@ -3,7 +3,7 @@ import { useChat } from './contexts/ChatContext';
 import styles from './Chat.module.css';
 
 export default function Chat() {
-  const { messages, sendMessage, abortCurrent } = useChat();
+  const { messages, sendMessage, abortCurrent, isMessageLimitReached } = useChat();
   const listRef = useRef<HTMLDivElement>(null);
 
   // autoscroll...
@@ -25,6 +25,7 @@ export default function Chat() {
         className={styles.inputRow}
         onSubmit={(e) => {
           e.preventDefault();
+          if (isMessageLimitReached) return;
           const field = e.currentTarget.elements.namedItem(
             'prompt'
           ) as HTMLInputElement;
@@ -36,11 +37,13 @@ export default function Chat() {
         <input
           type="text"
           name="prompt"
-          placeholder="Type a message, press Enter to send…"
+          placeholder={isMessageLimitReached ? "Límite de mensajes alcanzado" : "Type a message, press Enter to send…"}
           autoComplete="off"
+          disabled={isMessageLimitReached}
+          style={isMessageLimitReached ? { backgroundColor: '#f0f0f0', color: '#999', cursor: 'not-allowed' } : {}}
         />
-        <button type="submit">Send</button>
-        <button type="button" onClick={abortCurrent}>
+        <button type="submit" disabled={isMessageLimitReached} style={isMessageLimitReached ? { backgroundColor: '#ccc', color: '#999', cursor: 'not-allowed' } : {}}>Send</button>
+        <button type="button" onClick={abortCurrent} disabled={isMessageLimitReached} style={isMessageLimitReached ? { backgroundColor: '#ccc', color: '#999', cursor: 'not-allowed' } : {}}>
           Abort
         </button>
       </form>

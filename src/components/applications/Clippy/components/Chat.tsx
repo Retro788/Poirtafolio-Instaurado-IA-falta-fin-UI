@@ -14,7 +14,7 @@ interface ChatProps {
 }
 
 const Chat: React.FC<ChatProps> = ({ style }) => {
-  const { messages, sendMessage, abortCurrent } = useChat();
+  const { messages, sendMessage, abortCurrent, isMessageLimitReached } = useChat();
   const listRef = useRef<HTMLDivElement>(null);
 
   // autoscroll...
@@ -45,11 +45,13 @@ const Chat: React.FC<ChatProps> = ({ style }) => {
         <input
           type="text"
           name="prompt"
-          placeholder="Type a message, press Enter to send…"
+          placeholder={isMessageLimitReached ? "Límite de mensajes alcanzado" : "Type a message, press Enter to send…"}
           autoComplete="off"
+          disabled={isMessageLimitReached}
+          style={isMessageLimitReached ? { backgroundColor: '#f0f0f0', color: '#999', cursor: 'not-allowed' } : {}}
         />
-        <button type="submit">Send</button>
-        <button type="button" onClick={abortCurrent}>
+        <button type="submit" disabled={isMessageLimitReached} style={isMessageLimitReached ? { backgroundColor: '#ccc', color: '#999', cursor: 'not-allowed' } : {}}>Send</button>
+        <button type="button" onClick={abortCurrent} disabled={isMessageLimitReached} style={isMessageLimitReached ? { backgroundColor: '#ccc', color: '#999', cursor: 'not-allowed' } : {}}>
           Abort
         </button>
       </form>
