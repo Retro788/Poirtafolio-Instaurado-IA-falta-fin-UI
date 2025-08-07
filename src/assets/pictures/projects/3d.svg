@@ -1,0 +1,16 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Cube wireframe -->
+  <g stroke="#000" stroke-width="2" fill="none">
+    <!-- Front face -->
+    <rect x="8" y="16" width="16" height="16" />
+    <!-- Back face -->
+    <rect x="16" y="8" width="16" height="16" />
+    <!-- Connecting lines -->
+    <line x1="8" y1="16" x2="16" y2="8" />
+    <line x1="24" y1="16" x2="32" y2="8" />
+    <line x1="24" y1="32" x2="32" y2="24" />
+    <line x1="8" y1="32" x2="16" y2="24" />
+  </g>
+  <!-- 3D text -->
+  <text x="36" y="40" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#000">3D</text>
+</svg>

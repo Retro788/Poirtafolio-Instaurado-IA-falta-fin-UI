@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import software from '../../assets/pictures/projects/software.gif';
 import art from '../../assets/pictures/projects/art.gif';
 import music from '../../assets/pictures/projects/music.gif';
+import threeDIcon from '../../assets/pictures/projects/3d.svg';
 
 export interface ProjectsProps {}
 
@@ -99,6 +100,13 @@ const Projects: React.FC<ProjectsProps> = (props) => {
                     subtitle="ENDEAVORS"
                     route="art"
                 />
+                <ProjectBox
+                    icon={threeDIcon}
+                    iconStyle={styles.threeDIcon}
+                    title="3D Projects"
+                    subtitle="INTERACTIVE"
+                    route="3d"
+                />
             </div>
         </div>
     );
@@ -148,6 +156,10 @@ const styles: StyleSheetCSS = {
     artIcon: {
         width: 21 * 2,
         height: 37 * 2,
+    },
+    threeDIcon: {
+        width: 48,
+        height: 48,
     },
 };
 
