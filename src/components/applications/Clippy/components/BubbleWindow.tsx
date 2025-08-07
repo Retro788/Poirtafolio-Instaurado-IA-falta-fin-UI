@@ -117,6 +117,9 @@ export function Bubble({ className, style }: BubbleProps) {
               marginRight: "8px",
               paddingLeft: "8px",
               paddingRight: "8px",
+              display: "none",
+              visibility: "hidden",
+              pointerEvents: "none"
             }}
             onClick={handleSettingsClick}
           >

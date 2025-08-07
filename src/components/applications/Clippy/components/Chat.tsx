@@ -47,6 +47,11 @@ const Chat: React.FC<ChatProps> = ({ style }) => {
             </div>
           </div>
         ))}
+        {isMessageLimitReached && (
+          <div className={styles.limitMessage}>
+            Lamentamos los inconvenientes, has alcanzado el máximo de mensajes para esta muestra
+          </div>
+        )}
       </div>
 
       <form className={styles.inputRow} onSubmit={handleSubmit}>
@@ -60,7 +65,12 @@ const Chat: React.FC<ChatProps> = ({ style }) => {
           style={isMessageLimitReached ? { backgroundColor: '#f0f0f0', color: '#999', cursor: 'not-allowed' } : {}}
         />
         <button type="submit" disabled={isMessageLimitReached} style={isMessageLimitReached ? { backgroundColor: '#ccc', color: '#999', cursor: 'not-allowed' } : {}}>Send</button>
-        <button type="button" onClick={abortCurrent} disabled={isMessageLimitReached} style={isMessageLimitReached ? { backgroundColor: '#ccc', color: '#999', cursor: 'not-allowed' } : {}}>
+        <button type="button" onClick={abortCurrent} disabled={isMessageLimitReached} style={{
+          ...(isMessageLimitReached ? { backgroundColor: '#ccc', color: '#999', cursor: 'not-allowed' } : {}),
+          display: "none",
+          visibility: "hidden",
+          pointerEvents: "none"
+        }}>
           Abort
         </button>
       </form>
