@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import software from '../../assets/pictures/projects/software.gif';
 import art from '../../assets/pictures/projects/art.gif';
 import music from '../../assets/pictures/projects/music.gif';
@@ -66,45 +67,43 @@ const ProjectBox: React.FC<ProjectBoxProps> = ({
 };
 
 const Projects: React.FC<ProjectsProps> = (props) => {
+    const { t } = useTranslation();
     return (
         <div className="site-page-content">
-            <h1>Projects</h1>
-            <h3>& Hobbies</h3>
+            <h1>{t('showcase.projects.title')}</h1>
+            <h3>{t('showcase.projects.subtitle')}</h3>
             <br />
             <p>
-                Click on one of the areas below to check out some of my favorite
-                projects I've done in that field. I spent a lot of time to
-                include a lot of visuals and interactive media to showcase each
-                project. Enjoy!
+                {t('showcase.projects.description')}
             </p>
             <br />
             <div style={styles.projectLinksContainer}>
                 <ProjectBox
                     icon={software}
                     iconStyle={styles.computerIcon}
-                    title="Software"
-                    subtitle="PROJECTS"
+                    title={t('showcase.projects.tiles.software.title')}
+                    subtitle={t('showcase.projects.tiles.software.subtitle')}
                     route="software"
                 />
                 <ProjectBox
                     icon={music}
                     iconStyle={styles.musicIcon}
-                    title="Music"
-                    subtitle="VENTURES"
+                    title={t('showcase.projects.tiles.music.title')}
+                    subtitle={t('showcase.projects.tiles.music.subtitle')}
                     route="music"
                 />
                 <ProjectBox
                     icon={art}
                     iconStyle={styles.artIcon}
-                    title="Art"
-                    subtitle="ENDEAVORS"
+                    title={t('showcase.projects.tiles.art.title')}
+                    subtitle={t('showcase.projects.tiles.art.subtitle')}
                     route="art"
                 />
                 <ProjectBox
                     icon={threeDIcon}
                     iconStyle={styles.threeDIcon}
-                    title="3D Projects"
-                    subtitle="INTERACTIVE"
+                    title={t('showcase.projects.tiles.threeD.title')}
+                    subtitle={t('showcase.projects.tiles.threeD.subtitle')}
                     route="3d"
                 />
             </div>
@@ -164,3 +163,4 @@ const styles: StyleSheetCSS = {
 };
 
 export default Projects;
+

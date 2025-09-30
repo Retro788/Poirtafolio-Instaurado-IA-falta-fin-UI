@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Colors from '../../constants/colors';
 import ShowcaseExplorer from '../applications/ShowcaseExplorer';
 import Doom from '../applications/Doom';
@@ -12,64 +12,92 @@ import Scrabble from '../applications/Scrabble';
 import { IconName } from '../../assets/icons';
 import Credits from '../applications/Credits';
 import { ClippyAppWrapper } from '../applications/Clippy/ClippyAppWrapper';
+import LangSwitch from '../LangSwitch';
+import { useTranslation } from 'react-i18next';
 
 export interface DesktopProps {}
 
 type ExtendedWindowAppProps<T> = T & WindowAppProps;
 
+type ApplicationConfig = {
+    key: string;
+    nameKey: string;
+    shortcutIcon: IconName;
+    component: React.FC<ExtendedWindowAppProps<any>>;
+};
+
+type LocalizedApplication = ApplicationConfig & {
+    name: string;
+};
+
+type LocalizedApplicationsMap = Record<string, LocalizedApplication>;
+
 const APPLICATIONS: {
     [key in string]: {
         key: string;
-        name: string;
+        nameKey: string;
         shortcutIcon: IconName;
         component: React.FC<ExtendedWindowAppProps<any>>;
     };
 } = {
     // computer: {
     //     key: 'computer',
-    //     name: 'This Computer',
+    //     nameKey: 'desktop.apps.thisComputer',
     //     shortcutIcon: 'computerBig',
     //     component: ThisComputer,
     // },
     showcase: {
         key: 'showcase',
-        name: 'My Showcase',
+        nameKey: 'desktop.apps.showcase',
         shortcutIcon: 'showcaseIcon',
         component: ShowcaseExplorer,
     },
     trail: {
         key: 'trail',
-        name: 'The Oregon Trail',
+        nameKey: 'desktop.apps.oregonTrail',
         shortcutIcon: 'trailIcon',
         component: OregonTrail,
     },
     doom: {
         key: 'doom',
-        name: 'Doom',
+        nameKey: 'desktop.apps.doom',
         shortcutIcon: 'doomIcon',
         component: Doom,
     },
     scrabble: {
         key: 'scrabble',
-        name: 'Scrabble',
+        nameKey: 'desktop.apps.scrabble',
         shortcutIcon: 'scrabbleIcon',
         component: Scrabble,
     },
     henordle: {
         key: 'henordle',
-        name: 'Henordle',
+        nameKey: 'desktop.apps.henordle',
         shortcutIcon: 'henordleIcon',
         component: Henordle,
     },
     credits: {
         key: 'credits',
-        name: 'Credits',
+        nameKey: 'desktop.apps.credits',
         shortcutIcon: 'credits',
         component: Credits,
     },
 };
 
 const Desktop: React.FC<DesktopProps> = (props) => {
+    const { t } = useTranslation();
+    const hasOpenedShowcase = useRef(false);
+    const applications = useMemo<LocalizedApplicationsMap>(() => {
+        const localized = {} as LocalizedApplicationsMap;
+        Object.keys(APPLICATIONS).forEach((key) => {
+            const app = APPLICATIONS[key];
+            localized[key] = {
+                ...app,
+                name: t(app.nameKey),
+            };
+        });
+        return localized;
+    }, [t]);
     const [windows, setWindows] = useState<DesktopWindows>({});
 
     const [shortcuts, setShortcuts] = useState<DesktopShortcutProps[]>([]);
@@ -85,35 +113,24 @@ const Desktop: React.FC<DesktopProps> = (props) => {
     }, [shutdown]);
 
     useEffect(() => {
-        const newShortcuts: DesktopShortcutProps[] = [];
-        Object.keys(APPLICATIONS).forEach((key) => {
-            const app = APPLICATIONS[key];
-            newShortcuts.push({
-                shortcutName: app.name,
-                icon: app.shortcutIcon,
-                onOpen: () => {
-                    addWindow(
-                        app.key,
-                        <app.component
-                            onInteract={() => onWindowInteract(app.key)}
-                            onMinimize={() => minimizeWindow(app.key)}
-                            onClose={() => removeWindow(app.key)}
-                            key={app.key}
-                        />
-                    );
-                },
+        setWindows((prev) => {
+            let updated = false;
+            const next: DesktopWindows = { ...prev };
+            Object.keys(prev).forEach((key) => {
+                const appConfig = applications[key];
+                const windowData = prev[key];
+                if (appConfig && windowData && windowData.name !== appConfig.name) {
+                    next[key] = {
+                        ...windowData,
+                        name: appConfig.name,
+                        icon: appConfig.shortcutIcon,
+                    };
+                    updated = true;
+                }
             });
+            return updated ? next : prev;
         });
-
-        newShortcuts.forEach((shortcut) => {
-            if (shortcut.shortcutName === 'My Showcase') {
-                shortcut.onOpen();
-            }
-        });
-
-        setShortcuts(newShortcuts);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [applications]);
 
     const rebootDesktop = useCallback(() => {
         setWindows({});
@@ -186,63 +203,100 @@ const Desktop: React.FC<DesktopProps> = (props) => {
         }, 600);
     }, [numShutdowns]);
 
-    // 👇  NUEVA versión — evita los "unused vars" y centra cada ventana 
+    // ðŸ‘‡  NUEVA versiÃ³n â€” evita los "unused vars" y centra cada ventana 
     const openWindow = useCallback(
-      (appId: string) => { 
-        setWindows((prev) => { 
-          if (prev[appId]) return prev;            // ya existe 
+        (appId: string) => {
+            setWindows((prev) => {
+                if (prev[appId]) return prev; // ya existe
 
-          /*  A = Clippy → tamaño fijo;  B = resto → % viewport  */ 
-          const isClippy = appId === 'clippy'; 
-          const width  = isClippy ? 460 : Math.floor(window.innerWidth  * 0.70); 
-          const height = isClippy ? 640 : Math.floor(window.innerHeight * 0.80); 
+                const appConfig = applications[appId];
+                if (!appConfig) {
+                    return prev;
+                }
 
-          const x = Math.max(Math.round((window.innerWidth  - width)  / 2), 0); 
-          const y = Math.max(Math.round((window.innerHeight - height) / 2), 0); 
+                const AppComponent = appConfig.component;
+                const appElement = (
+                    <AppComponent
+                        onInteract={() => onWindowInteract(appId)}
+                        onMinimize={() => minimizeWindow(appId)}
+                        onClose={() => removeWindow(appId)}
+                    />
+                );
 
-          // Creamos un elemento para la aplicación
-          const AppComponent = APPLICATIONS[appId].component;
-          const appElement = (
-              <AppComponent
-                  onInteract={() => onWindowInteract(appId)}
-                  onMinimize={() => minimizeWindow(appId)}
-                  onClose={() => removeWindow(appId)}
-              />
-          );
-
-          return { 
-            ...prev, 
-            [appId]: { 
-              component: appElement,
-              minimized: false,
-              name: APPLICATIONS[appId].name,
-              icon: APPLICATIONS[appId].shortcutIcon,
-              zIndex: getHighestZIndex() + 1,
-            }, 
-          }; 
-        }); 
-      }, 
-      [getHighestZIndex, setWindows, onWindowInteract, minimizeWindow, removeWindow] 
+                return {
+                    ...prev,
+                    [appId]: {
+                        component: appElement,
+                        minimized: false,
+                        name: appConfig.name,
+                        icon: appConfig.shortcutIcon,
+                        zIndex: getHighestZIndex() + 1,
+                    },
+                };
+            });
+        },
+        [applications, getHighestZIndex, minimizeWindow, onWindowInteract, removeWindow, setWindows]
     );
-
     const addWindow = useCallback(
         (key: string, element: JSX.Element) => {
+            const appConfig = applications[key];
+            if (!appConfig) {
+                return;
+            }
             setWindows((prevState) => ({
                 ...prevState,
                 [key]: {
                     zIndex: getHighestZIndex() + 1,
                     minimized: false,
                     component: element,
-                    name: APPLICATIONS[key].name,
-                    icon: APPLICATIONS[key].shortcutIcon,
+                    name: appConfig.name,
+                    icon: appConfig.shortcutIcon,
                 },
             }));
         },
-        [getHighestZIndex]
+        [applications, getHighestZIndex]
     );
+    useEffect(() => {
+        const newShortcuts: DesktopShortcutProps[] = Object.keys(applications).map((key) => {
+            const app = applications[key];
+            return {
+                shortcutName: app.name,
+                icon: app.shortcutIcon,
+                onOpen: () => {
+                    addWindow(
+                        app.key,
+                        <app.component
+                            onInteract={() => onWindowInteract(app.key)}
+                            onMinimize={() => minimizeWindow(app.key)}
+                            onClose={() => removeWindow(app.key)}
+                            key={app.key}
+                        />
+                    );
+                },
+            };
+        });
+
+        const showcaseApp = applications['showcase'];
+        if (!hasOpenedShowcase.current && showcaseApp) {
+            addWindow(
+                showcaseApp.key,
+                <showcaseApp.component
+                    onInteract={() => onWindowInteract(showcaseApp.key)}
+                    onMinimize={() => minimizeWindow(showcaseApp.key)}
+                    onClose={() => removeWindow(showcaseApp.key)}
+                    key={showcaseApp.key}
+                />
+            );
+            hasOpenedShowcase.current = true;
+        }
+
+        setShortcuts(newShortcuts);
+    }, [applications, addWindow, minimizeWindow, onWindowInteract, removeWindow]);
+
 
     return !shutdown ? (
         <div style={styles.desktop}>
+            <LangSwitch />
             {/* For each window in windows, loop over and render  */}
             {Object.keys(windows).map((key) => {
                 const element = windows[key].component;
@@ -302,6 +356,7 @@ const styles: StyleSheetCSS = {
         minHeight: '100%',
         flex: 1,
         backgroundColor: Colors.turquoise,
+        position: 'relative',
     },
     shutdown: {
         minHeight: '100%',
@@ -323,3 +378,7 @@ const styles: StyleSheetCSS = {
 };
 
 export default Desktop;
+
+
+
+

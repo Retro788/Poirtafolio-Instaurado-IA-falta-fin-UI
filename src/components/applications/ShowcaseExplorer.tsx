@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Home from '../showcase/Home';
 import About from '../showcase/About';
 import Window from '../os/Window';
@@ -16,6 +17,7 @@ import { useInitialWindowSize } from '../../hooks/useInitialWindowSize';
 export interface ShowcaseExplorerProps extends WindowAppProps {}
 
 const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = (props) => {
+    const { t } = useTranslation();
     const { width: initWidth, height: initHeight } = useInitialWindowSize({
         defaultWidth: window.innerWidth - 100,
         defaultHeight: window.innerHeight - 100
@@ -27,12 +29,12 @@ const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = (props) => {
             left={56}
             width={initWidth}
             height={initHeight}
-            windowTitle="RetroTheDev - Showcase 2022"
+            windowTitle={t('showcase.windowTitle')}
             windowBarIcon="windowExplorerIcon"
             closeWindow={props.onClose}
             onInteract={props.onInteract}
             minimizeWindow={props.onMinimize}
-            bottomLeftText={'© Copyright 2022 X'}
+            bottomLeftText={t('showcase.windowFooter')}
         >
             <div className="site-page">
                 <VerticalNavbar />
@@ -59,3 +61,6 @@ const ShowcaseExplorer: React.FC<ShowcaseExplorerProps> = (props) => {
 };
 
 export default ShowcaseExplorer;
+
+
+

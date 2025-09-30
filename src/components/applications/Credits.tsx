@@ -2,127 +2,90 @@ import React, { useEffect, useState } from 'react';
 import Window from '../os/Window';
 import { useInterval } from 'usehooks-ts';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export interface CreditsProps extends WindowAppProps {}
 
-const CREDITS = [
-    {
-        title: 'Engineering & Design',
-        rows: [['X', 'All']],
-    },
-    {
-        title: 'Modeling & Texturing',
-        rows: [
-            ['X', 'Texturing, Composition, & UV'],
-            ['Mickael Boitte', 'Computer Model'],
-            ['Sean Nicolas', 'Environment Models'],
-        ],
-    },
-    {
-        title: 'Sound Design',
-        rows: [
-            ['X', 'Mixing, Composition, & Foley'],
-            ['Sound Cassette', 'Office Ambience'],
-            ['Windows 95 Startup Sound', 'Microsoft'],
-        ],
-    },
-    {
-        title: 'Special Thanks',
-        rows: [
-            ['Bruno Simon', 'SimonDev'],
-            ['Lorelei Kravinsky', 'Scott Bass'],
-            ['Trey Briccetti', 'Mom, Dad & Angela'],
-        ],
-    },
-    {
-        title: 'Inspiration',
-        rows: [
-            ['Bruno Simon', 'Jesse Zhou'],
-            ['Pink Yellow', 'Vivek Patel'],
-        ],
-    },
-];
+type CreditsSection = {
+    title: string;
+    rows: [string, string][];
+};
 
 const Credits: React.FC<CreditsProps> = (props) => {
+    const { t } = useTranslation();
+    const sections = t('credits.sections', { returnObjects: true }) as CreditsSection[];
+    const totalSlides = sections.length || 1;
     const [currentSlide, setCurrentSlide] = useState(0);
     const [time, setTime] = useState(0);
 
-    // every 5 seconds, move to the next slide
+    const currentSection: CreditsSection =
+        sections.length > 0 ? sections[currentSlide % totalSlides] : { title: '', rows: [] };
+
+    useEffect(() => {
+        if (currentSlide >= totalSlides) {
+            setCurrentSlide(0);
+        }
+    }, [currentSlide, totalSlides]);
+
     useInterval(() => {
-        setTime(time + 1);
-        // setCurrentSlide((currentSlide + 1) % CREDITS.length);
+        setTime((prev) => prev + 1);
     }, 1000);
 
     useEffect(() => {
         if (time > 5) {
-            setCurrentSlide((currentSlide + 1) % CREDITS.length);
+            setCurrentSlide((prev) => (prev + 1) % totalSlides);
             setTime(0);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [time]);
+    }, [time, totalSlides]);
 
     const nextSlide = () => {
         setTime(0);
-        setCurrentSlide((currentSlide + 1) % CREDITS.length);
+        setCurrentSlide((prev) => (prev + 1) % totalSlides);
     };
 
     return (
-        // add on resize listener
         <Window
             top={48}
             left={48}
             width={1100}
             height={800}
-            windowTitle="Credits"
+            windowTitle={t('credits.windowTitle')}
             windowBarIcon="windowExplorerIcon"
             closeWindow={props.onClose}
             onInteract={props.onInteract}
             minimizeWindow={props.onMinimize}
-            bottomLeftText={'© Copyright 2022 X'}
+            bottomLeftText={t('credits.windowFooter')}
         >
-            <div
-                onMouseDown={nextSlide}
-                className="site-page"
-                style={styles.credits}
-            >
-                <h2>Credits</h2>
-                <p>X.com, 2022</p>
+            <div onMouseDown={nextSlide} className="site-page" style={styles.credits}>
+                <h2>{t('credits.heading')}</h2>
+                <p>{t('credits.subtitle')}</p>
                 <br />
                 <br />
                 <br />
                 <div style={styles.slideContainer}>
-                    {
-                        <motion.div
-                            animate={{ opacity: 1, y: -20 }}
-                            transition={{ duration: 0.5 }}
-                            key={`section-${CREDITS[currentSlide].title}`}
-                            style={styles.section}
-                        >
-                            <h3 style={styles.sectionTitle}>
-                                {CREDITS[currentSlide].title}
-                            </h3>
-                            {CREDITS[currentSlide].rows.map((row, i) => {
-                                return (
-                                    <div key={`row-${i}`} style={styles.row}>
-                                        <p>{row[0]}</p>
-                                        <p>{row[1]}</p>
-                                    </div>
-                                );
-                            })}
-                        </motion.div>
-                    }
+                    <motion.div
+                        animate={{ opacity: 1, y: -20 }}
+                        transition={{ duration: 0.5 }}
+                        key={`section-${currentSection.title}`}
+                        style={styles.section}
+                    >
+                        <h3 style={styles.sectionTitle}>{currentSection.title}</h3>
+                        {currentSection.rows.map((row, index) => (
+                            <div key={`row-${index}`} style={styles.row}>
+                                <p>{row[0]}</p>
+                                <p>{row[1]}</p>
+                            </div>
+                        ))}
+                    </motion.div>
                 </div>
-                <p>Click to continue...</p>
+                <p>{t('credits.clickPrompt')}</p>
                 <br />
                 <div style={styles.nextSlideTimer}>
-                    {/* make a time number of dots */}
-                    {Array.from(Array(time)).map((i) => {
-                        return (
-                            <div key={i}>
-                                <p>.</p>
-                            </div>
-                        );
-                    })}
+                    {Array.from({ length: time }).map((_, index) => (
+                        <div key={`timer-${index}`}>
+                            <p>.</p>
+                        </div>
+                    ))}
                 </div>
             </div>
         </Window>

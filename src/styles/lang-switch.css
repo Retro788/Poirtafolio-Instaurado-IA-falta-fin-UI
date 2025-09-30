@@ -1,0 +1,66 @@
+﻿.pixel-font {
+    font-family: 'MS Sans Serif', 'lores-15-bold-alt-oakland', var(--pixel-font, MSSerif), sans-serif;
+    letter-spacing: 0.5px;
+}
+
+.lang-switch {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    user-select: none;
+    z-index: 0;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    padding: 2px;
+    box-shadow: inset 1px 1px 0px #ffffff, inset -1px -1px 0px #808080;
+}
+
+.lang-btn {
+    padding: 2px 8px;
+    border: 1px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    background: #c0c0c0;
+    font-size: 11px;
+    font-weight: normal;
+    line-height: 1.2;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: 'MS Sans Serif', sans-serif;
+    color: #000000;
+    min-width: 20px;
+    text-align: center;
+    box-shadow: inset 1px 1px 0px #ffffff, inset -1px -1px 0px #808080;
+}
+
+.lang-btn:hover {
+    background: #e0e0e0;
+}
+
+.lang-btn:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+    box-shadow: inset -1px -1px 0px #ffffff, inset 1px 1px 0px #808080;
+    background: #b0b0b0;
+}
+
+.lang-btn.active {
+    background: #000080;
+    color: #ffffff;
+    border-color: #808080 #ffffff #ffffff #808080;
+    box-shadow: inset -1px -1px 0px #ffffff, inset 1px 1px 0px #808080;
+}
+
+.lang-btn.active:hover {
+    background: #0000a0;
+}
+
+.sep {
+    color: #808080;
+    font-weight: normal;
+    margin: 0 1px;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 11px;
+}

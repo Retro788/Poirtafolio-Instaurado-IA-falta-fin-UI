@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import Colors from '../../constants/colors';
 import { Icon } from '../general';
 // import { } from '../general';
@@ -16,6 +17,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
     toggleMinimize,
     shutdown,
 }) => {
+    const { t } = useTranslation();
     const getTime = () => {
         const date = new Date();
         let hours = date.getHours();
@@ -111,7 +113,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
                                     icon="computerBig"
                                 />
                                 <p style={styles.startMenuText}>
-                                    Sh<u>u</u>t down...
+                                    <Trans i18nKey="toolbar.shutdown" components={{ underline: <u /> }} />
                                 </p>
                             </div>
                         </div>
@@ -140,7 +142,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
                                 icon="windowsStartIcon"
                                 style={styles.startIcon}
                             />
-                            <p className="toolbar-text ">Start</p>
+                            <p className="toolbar-text ">{t('toolbar.start')}</p>
                         </div>
                     </div>
                     <div style={styles.toolbarTabsContainer}>

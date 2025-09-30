@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from '../general';
 import forHire from '../../assets/pictures/forHireGif.gif';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -6,6 +7,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 export interface VerticalNavbarProps {}
 
 const VerticalNavbar: React.FC<VerticalNavbarProps> = (props) => {
+    const { t } = useTranslation();
     const location = useLocation();
     const [projectsExpanded, setProjectsExpanded] = useState(false);
     const [isHome, setIsHome] = useState(false);
@@ -34,15 +36,15 @@ const VerticalNavbar: React.FC<VerticalNavbarProps> = (props) => {
             <div style={styles.header}>
                 <h1 style={styles.headerText}>X</h1>
                 <h1 style={styles.headerText}>X</h1>
-                <h3 style={styles.headerShowcase}>Showcase '22</h3>
+                <h3 style={styles.headerShowcase}>{t('showcase.nav.headerLabel')}</h3>
             </div>
             <div style={styles.links}>
-                <Link containerStyle={styles.link} to="" text="HOME" />
-                <Link containerStyle={styles.link} to="about" text="ABOUT" />
+                <Link containerStyle={styles.link} to="" text={t('showcase.nav.home')} />
+                <Link containerStyle={styles.link} to="about" text={t('showcase.nav.about')} />
                 <Link
                     containerStyle={styles.link}
                     to="experience"
-                    text="EXPERIENCE"
+                    text={t('showcase.nav.experience')}
                 />
                 <Link
                     containerStyle={Object.assign(
@@ -51,7 +53,7 @@ const VerticalNavbar: React.FC<VerticalNavbarProps> = (props) => {
                         projectsExpanded && styles.expandedLink
                     )}
                     to="projects"
-                    text="PROJECTS"
+                    text={t('showcase.nav.projects')}
                 />
                 {
                     // if current path contains projects
@@ -60,17 +62,17 @@ const VerticalNavbar: React.FC<VerticalNavbarProps> = (props) => {
                             <Link
                                 containerStyle={styles.insetLink}
                                 to="projects/software"
-                                text="SOFTWARE"
+                                text={t('showcase.nav.software')}
                             />
                             <Link
                                 containerStyle={styles.insetLink}
                                 to="projects/music"
-                                text="MUSIC"
+                                text={t('showcase.nav.music')}
                             />
                             <Link
                                 containerStyle={styles.insetLink}
                                 to="projects/art"
-                                text="ART"
+                                text={t('showcase.nav.art')}
                             />
                         </div>
                     )
@@ -78,7 +80,7 @@ const VerticalNavbar: React.FC<VerticalNavbarProps> = (props) => {
                 <Link
                     containerStyle={styles.link}
                     to="contact"
-                    text="CONTACT"
+                    text={t('showcase.nav.contact')}
                 />
             </div>
             <div style={styles.spacer} />
@@ -149,3 +151,4 @@ const styles: StyleSheetCSS = {
 };
 
 export default VerticalNavbar;
+

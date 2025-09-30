@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from '../general';
 
 import forhire from '../../assets/pictures/forHireGif.gif';
@@ -7,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 export interface HomeProps {}
 
 const Home: React.FC<HomeProps> = (props) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const goToContact = () => {
@@ -17,24 +19,24 @@ const Home: React.FC<HomeProps> = (props) => {
         <div style={styles.page}>
             <div style={styles.header}>
                 <h1 style={styles.name}>Fernando San Gabriel</h1>
-                <h2>Software Engineer</h2>
+                <h2>{t('showcase.home.subtitle')}</h2>
             </div>
             <div style={styles.buttons}>
-                <Link containerStyle={styles.link} to="about" text="ABOUT" />
+                <Link containerStyle={styles.link} to="about" text={t('showcase.nav.about')} />
                 <Link
                     containerStyle={styles.link}
                     to="experience"
-                    text="EXPERIENCE"
+                    text={t('showcase.nav.experience')}
                 />
                 <Link
                     containerStyle={styles.link}
                     to="projects"
-                    text="PROJECTS"
+                    text={t('showcase.nav.projects')}
                 />
                 <Link
                     containerStyle={styles.link}
                     to="contact"
-                    text="CONTACT"
+                    text={t('showcase.nav.contact')}
                 />
             </div>
             <div style={styles.forHireContainer} onMouseDown={goToContact}>
@@ -92,3 +94,5 @@ const styles: StyleSheetCSS = {
 };
 
 export default Home;
+
+

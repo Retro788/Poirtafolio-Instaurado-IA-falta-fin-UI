@@ -1,32 +1,40 @@
-import React, { useState } from 'react';
-import DosPlayer from '../dos/DosPlayer';
+import React from 'react';
+// import DesktopShortcut from '../os/DesktopShortcut';
 import Window from '../os/Window';
 
-export interface OregonTrailAppProps extends WindowAppProps {}
+export interface ThisComputerProps extends WindowAppProps {}
 
-const OregonTrailApp: React.FC<OregonTrailAppProps> = (props) => {
-    const [width, setWidth] = useState(920);
-    const [height, setHeight] = useState(750);
-
+const ThisComputerApp: React.FC<ThisComputerProps> = (props) => {
     return (
         <Window
-            top={10}
-            left={10}
-            width={width}
-            height={height}
-            windowTitle="The Oregon Trail"
-            windowBarIcon="windowGameIcon"
-            windowBarColor="#240C00"
-            bottomLeftText={'Powered by JSDOS & DOSBox'}
+            top={20}
+            left={20}
+            width={600}
+            height={400}
+            windowBarIcon="computerSmall"
+            windowTitle="This Computer"
             closeWindow={props.onClose}
             onInteract={props.onInteract}
             minimizeWindow={props.onMinimize}
-            onWidthChange={setWidth}
-            onHeightChange={setHeight}
         >
-            <DosPlayer width={width} height={height} bundleUrl="trail.jsdos" />
+            <div className="site-page">
+                <iframe
+                    src="https://oldgoogle.neocities.org/1998/"
+                    title="google"
+                    width="100%"
+                    height="100%"
+                />
+                {/* <div style={}>
+                    <DesktopShortcut
+                        icon="computerBig"
+                        invertText
+                        shortcutName={'Computer Details'}
+                        onOpen={() => {}}
+                    />
+                </div> */}
+            </div>
         </Window>
     );
 };
 
-export default OregonTrailApp;
+export default ThisComputerApp;

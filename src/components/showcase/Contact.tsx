@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
+﻿import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import colors from '../../constants/colors';
 import twitterIcon from '../../assets/pictures/contact-twitter.png';
 import ghIcon from '../../assets/pictures/contact-gh.png';
@@ -31,6 +32,7 @@ const SocialBox: React.FC<SocialBoxProps> = ({ link, icon }) => {
 };
 
 const Contact: React.FC<ContactProps> = (props) => {
+    const { t } = useTranslation();
     const [company, setCompany] = useState('');
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
@@ -50,7 +52,7 @@ const Contact: React.FC<ContactProps> = (props) => {
 
     async function submitForm() {
         if (!isFormValid) {
-            setFormMessage('Form unable to validate, please try again.');
+            setFormMessage(t('showcase.contact.validationError'));
             setFormMessageColor('red');
             return;
         }
@@ -79,7 +81,7 @@ const Contact: React.FC<ContactProps> = (props) => {
                   }
                 | { success: true };
             if (data.success) {
-                setFormMessage(`Message successfully sent. Thank you ${name}!`);
+                setFormMessage(t('showcase.contact.success', { name }));
                 setCompany('');
                 setEmail('');
                 setName('');
@@ -92,9 +94,7 @@ const Contact: React.FC<ContactProps> = (props) => {
                 setIsLoading(false);
             }
         } catch (e) {
-            setFormMessage(
-                'There was an error sending your message. Please try again.'
-            );
+            setFormMessage(t('showcase.contact.genericError'));
             setFormMessageColor(colors.red);
             setIsLoading(false);
         }
@@ -112,7 +112,7 @@ const Contact: React.FC<ContactProps> = (props) => {
     return (
         <div className="site-page-content">
             <div style={styles.header}>
-                <h1>Contact</h1>
+                <h1>{t('showcase.contact.title')}</h1>
                 <div style={styles.socials}>
                     <SocialBox
                         icon={ghIcon}
@@ -130,16 +130,13 @@ const Contact: React.FC<ContactProps> = (props) => {
             </div>
             <div className="text-block">
                 <p>
-                    I am currently employed, however if you have any
-                    opportunities, feel free to reach out - I would love to
-                    chat! You can reach me via my personal email, or fill out
-                    the form below!
+                    {t('showcase.contact.intro')}
                 </p>
                 <br />
                 <p>
-                    <b>Email: </b>
-                    <a href="mailto:X@gmail.com">
-                        X@gmail.com
+                    <b>{t('showcase.contact.emailLabel')}</b>
+                    <a href={`mailto:${t('showcase.contact.emailAddress')}`}>
+                        {t('showcase.contact.emailAddress')}
                     </a>
                 </p>
 
@@ -147,14 +144,14 @@ const Contact: React.FC<ContactProps> = (props) => {
                     <label>
                         <p>
                             {!name && <span style={styles.star}>*</span>}
-                            <b>Your name:</b>
+                            <b>{t('showcase.contact.form.nameLabel')}</b>
                         </p>
                     </label>
                     <input
                         style={styles.formItem}
                         type="text"
                         name="name"
-                        placeholder="Name"
+                        placeholder={t('showcase.contact.form.namePlaceholder')}
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                     />
@@ -163,39 +160,39 @@ const Contact: React.FC<ContactProps> = (props) => {
                             {!validateEmail(email) && (
                                 <span style={styles.star}>*</span>
                             )}
-                            <b>Email:</b>
+                            <b>{t('showcase.contact.form.emailLabel')}</b>
                         </p>
                     </label>
                     <input
                         style={styles.formItem}
                         type="email"
                         name="email"
-                        placeholder="Email"
+                        placeholder={t('showcase.contact.form.emailPlaceholder')}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
                     <label>
                         <p>
-                            <b>Company (optional):</b>
+                            <b>{t('showcase.contact.form.companyLabel')}</b>
                         </p>
                     </label>
                     <input
                         style={styles.formItem}
                         type="company"
                         name="company"
-                        placeholder="Company"
+                        placeholder={t('showcase.contact.form.companyPlaceholder')}
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
                     />
                     <label>
                         <p>
                             {!message && <span style={styles.star}>*</span>}
-                            <b>Message:</b>
+                            <b>{t('showcase.contact.form.messageLabel')}</b>
                         </p>
                     </label>
                     <textarea
                         name="message"
-                        placeholder="Message"
+                        placeholder={t('showcase.contact.form.messagePlaceholder')}
                         style={styles.formItem}
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
@@ -209,9 +206,9 @@ const Contact: React.FC<ContactProps> = (props) => {
                             onMouseDown={submitForm}
                         >
                             {!isLoading ? (
-                                'Send Message'
+                                t('showcase.contact.form.submit')
                             ) : (
-                                <p className="loading">Sending</p>
+                                <p className="loading">{t('showcase.contact.form.sending')}</p>
                             )}
                         </button>
                         <div style={styles.formInfo}>
@@ -223,9 +220,7 @@ const Contact: React.FC<ContactProps> = (props) => {
                             >
                                 <b>
                                     <sub>
-                                        {formMessage
-                                            ? `${formMessage}`
-                                            : ' All messages get forwarded straight to my personal email'}
+                                        {formMessage ? formMessage : t('showcase.contact.form.forwardingInfo')}
                                     </sub>
                                 </b>
                             </p>
@@ -233,11 +228,10 @@ const Contact: React.FC<ContactProps> = (props) => {
                                 <sub>
                                     {!isFormValid ? (
                                         <span>
-                                            <b style={styles.star}>*</b> =
-                                            required
+                                            <b style={styles.star}>*</b> = {t('showcase.contact.form.required')}
                                         </span>
                                     ) : (
-                                        '\xa0'
+                                        t('showcase.contact.form.nbsp')
                                     )}
                                 </sub>
                             </p>
@@ -245,7 +239,7 @@ const Contact: React.FC<ContactProps> = (props) => {
                     </div>
                 </div>
             </div>
-            <ResumeDownload altText="Need a copy of my Resume?" />
+            <ResumeDownload altText={t('showcase.contact.resumePrompt')} />
         </div>
     );
 };
@@ -302,3 +296,7 @@ const styles: StyleSheetCSS = {
 };
 
 export default Contact;
+
+
+
+

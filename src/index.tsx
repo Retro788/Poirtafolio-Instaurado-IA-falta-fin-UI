@@ -6,6 +6,7 @@ import "./components/applications/Clippy/components/css/Theme.css";
 import "./components/applications/Clippy/components/css/App.css";
 import "./components/applications/Clippy/clippy-animations.css";
 import "./index.css";
+import "./i18n";
 import App from "./App";
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
@@ -23,3 +24,4 @@ ReactDOM.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
